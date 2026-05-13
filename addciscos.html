@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Додати сертифікат Cisco</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f3f6fb;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      font-size: 20px;
+      opacity: 0.95;
+    }
+
+    nav {
+      background: #111827;
+      padding: 14px 20px;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      color: #93c5fd;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    section {
+      background: white;
+      margin-bottom: 25px;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    section h2 {
+      color: #1e3a8a;
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+
+    form {
+      margin-top: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #111827;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 18px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+
+    .publish-button {
+      padding: 14px 22px;
+      background: #2563eb;
+      color: white;
+    }
+
+    .publish-button:hover {
+      background: #1e3a8a;
+    }
+
+    .certificate-list {
+      margin-top: 20px;
+      list-style: none;
+      font-size: 18px;
+    }
+
+    .certificate-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+    }
+
+    .certificate-list a {
+      color: #2563eb;
+      font-weight: bold;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .certificate-list a:hover {
+      text-decoration: underline;
+    }
+
+    .delete-button {
+      padding: 10px 14px;
+      background: #dc2626;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .delete-button:hover {
+      background: #991b1b;
+    }
+
+    .empty-message {
+      margin-top: 15px;
+      color: #6b7280;
+      font-size: 18px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: #111827;
+      color: white;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 700px) {
+      header h1 {
+        font-size: 32px;
+      }
+
+      nav a {
+        display: inline-block;
+        margin: 8px 10px;
+      }
+
+      .certificate-list li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Додати сертифікат Cisco</h1>
+    <p>Додавання сертифікатів Cisco до портфоліо</p>
+  </header>
+
+  <nav>
+    <a href="index.html">Головна</a>
+    <a href="sert.html">Сертифікати</a>
+    <a href="ciscos.html">Cisco</a>
+  </nav>
+
+  <main>
+    <section>
+      <h2>Додати сертифікат Cisco</h2>
+      <p>Впишіть назву сертифіката та посилання на нього, після чого натисніть кнопку “Опублікувати”.</p>
+
+     <form id="certificateForm">
+  <label>Назва + PDF-файл сертифіката</label>
+  <input type="text" id="certificateName" placeholder="Назва сертифіката" required />
+  <input type="file" id="certificateFile" accept="application/pdf" required />
+
+  <button type="submit" class="publish-button">Опублікувати</button>
+</form>
+    </section>
+
+    <section>
+      <h2>Опубліковані сертифікати Cisco</h2>
+      <ul class="certificate-list" id="adminCertificateList"></ul>
+      <p class="empty-message" id="emptyMessage">Поки що список сертифікатів порожній.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Кравчук Арсеній Юрійович. Усі права захищено.</p>
+  </footer>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc,
+    serverTimestamp,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL,
+    deleteObject
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyC7OJUhJHfA3zfQDKlzpMBduAs3rpg9JwM",
+  authDomain: "siteper.firebaseapp.com",
+  projectId: "siteper",
+  storageBucket: "siteper.firebasestorage.app",
+  messagingSenderId: "44911024562",
+  appId: "1:44911024562:web:aa0de8b190a496cb926cab",
+  measurementId: "G-SGMFS2W2KB"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  const COLLECTION_NAME = "ciscoCertificates";
+  const STORAGE_FOLDER = "ciscoCertificates";
+
+  const form = document.getElementById("certificateForm");
+  const certificateName = document.getElementById("certificateName");
+  const certificateFile = document.getElementById("certificateFile");
+  const adminCertificateList = document.getElementById("adminCertificateList");
+  const emptyMessage = document.getElementById("emptyMessage");
+
+  function safeFileName(fileName) {
+    return fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+  }
+
+  async function renderCertificates() {
+    adminCertificateList.innerHTML = "";
+
+    try {
+      const certificatesQuery = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(certificatesQuery);
+
+      if (querySnapshot.empty) {
+        emptyMessage.style.display = "block";
+        return;
+      }
+
+      emptyMessage.style.display = "none";
+
+      querySnapshot.forEach(function(documentItem) {
+        const certificate = documentItem.data();
+
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        const deleteButton = document.createElement("button");
+
+        link.href = certificate.fileUrl;
+        link.textContent = certificate.name;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        deleteButton.textContent = "Delete";
+        deleteButton.className = "delete-button";
+        deleteButton.onclick = async function() {
+          try {
+            if (certificate.storagePath) {
+              await deleteObject(ref(storage, certificate.storagePath));
+            }
+          } catch (error) {
+            console.warn("Storage file was not deleted:", error);
+          }
+
+          await deleteDoc(doc(db, COLLECTION_NAME, documentItem.id));
+          renderCertificates();
+        };
+
+        li.appendChild(link);
+        li.appendChild(deleteButton);
+        adminCertificateList.appendChild(li);
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Firebase loading error.");
+    }
+  }
+
+  form.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const name = certificateName.value.trim();
+    const file = certificateFile.files[0];
+
+    if (name === "" || !file) {
+      alert("Fill in name and choose a PDF file.");
+      return;
+    }
+
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      alert("Choose a PDF file.");
+      return;
+    }
+
+    try {
+      const storagePath = `${STORAGE_FOLDER}/${Date.now()}_${safeFileName(file.name)}`;
+      const fileRef = ref(storage, storagePath);
+
+      await uploadBytes(fileRef, file);
+      const fileUrl = await getDownloadURL(fileRef);
+
+      await addDoc(collection(db, COLLECTION_NAME), {
+        name: name,
+        fileName: file.name,
+        fileUrl: fileUrl,
+        storagePath: storagePath,
+        createdAt: serverTimestamp()
+      });
+
+      certificateName.value = "";
+      certificateFile.value = "";
+
+      await renderCertificates();
+      alert("Cisco certificate published.");
+    } catch (error) {
+      console.error(error);
+      alert("PDF upload failed. Enable Firebase Storage and check Storage rules.");
+    }
+  });
+
+  renderCertificates();
+</script>
+</body>
+</html>

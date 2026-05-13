@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сертифікати Cisco</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f3f6fb;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      font-size: 20px;
+      opacity: 0.95;
+    }
+
+    nav {
+      background: #111827;
+      padding: 14px 20px;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      color: #93c5fd;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    section {
+      background: white;
+      margin-bottom: 25px;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    section h2 {
+      color: #1e3a8a;
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+
+    .certificate-list {
+      margin-top: 20px;
+      list-style: none;
+      font-size: 18px;
+    }
+
+    .certificate-list li {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+    }
+
+    .certificate-list a {
+      color: #2563eb;
+      font-weight: bold;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .certificate-list a:hover {
+      text-decoration: underline;
+    }
+
+    .empty-message {
+      margin-top: 15px;
+      color: #6b7280;
+      font-size: 18px;
+    }
+
+    .add-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 14px 22px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .add-button:hover {
+      background: #1e3a8a;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: #111827;
+      color: white;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 700px) {
+      header h1 {
+        font-size: 32px;
+      }
+
+      nav a {
+        display: inline-block;
+        margin: 8px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Сертифікати Cisco</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">Головна</a>
+    <a href="sert.html">Сертифікати</a>
+  </nav>
+
+  <main>
+    <section>
+      <h2>Список сертифікатів Cisco</h2>
+      <p>На цій сторінці наявні отримані мною сертифікати Cisco.</p>
+      <ul class="certificate-list" id="certificateList"></ul>
+      <p class="empty-message" id="emptyMessage">Поки що список сертифікатів порожній.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Кравчук Арсеній Юрійович. Усі права захищено.</p>
+  </footer>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyC7OJUhJHfA3zfQDKlzpMBduAs3rpg9JwM",
+  authDomain: "siteper.firebaseapp.com",
+  projectId: "siteper",
+  storageBucket: "siteper.firebasestorage.app",
+  messagingSenderId: "44911024562",
+  appId: "1:44911024562:web:aa0de8b190a496cb926cab",
+  measurementId: "G-SGMFS2W2KB"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const COLLECTION_NAME = "ciscoCertificates";
+
+  const certificateList = document.getElementById("certificateList");
+  const emptyMessage = document.getElementById("emptyMessage");
+
+  async function renderCertificates() {
+    certificateList.innerHTML = "";
+
+    try {
+      const certificatesQuery = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(certificatesQuery);
+
+      if (querySnapshot.empty) {
+        emptyMessage.style.display = "block";
+        return;
+      }
+
+      emptyMessage.style.display = "none";
+
+      querySnapshot.forEach(function(documentItem) {
+        const certificate = documentItem.data();
+
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+
+        link.href = certificate.fileUrl;
+        link.textContent = certificate.name;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        li.appendChild(link);
+        certificateList.appendChild(li);
+      });
+    } catch (error) {
+      console.error(error);
+      emptyMessage.textContent = "Firebase loading error.";
+      emptyMessage.style.display = "block";
+    }
+  }
+
+  renderCertificates();
+</script>
+</body>
+</html>

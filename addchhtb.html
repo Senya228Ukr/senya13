@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Додати челенж HackTheBox</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f3f6fb;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      font-size: 20px;
+      opacity: 0.95;
+    }
+
+    nav {
+      background: #111827;
+      padding: 14px 20px;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      color: #93c5fd;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    section {
+      background: white;
+      margin-bottom: 25px;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    section h2 {
+      color: #1e3a8a;
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+
+    form {
+      margin-top: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #111827;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 18px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+
+    .publish-button {
+      padding: 14px 22px;
+      background: #2563eb;
+      color: white;
+    }
+
+    .publish-button:hover {
+      background: #1e3a8a;
+    }
+
+    .challenge-list {
+      margin-top: 20px;
+      list-style: none;
+      font-size: 18px;
+    }
+
+    .challenge-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+    }
+
+    .challenge-list a {
+      color: #2563eb;
+      font-weight: bold;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .challenge-list a:hover {
+      text-decoration: underline;
+    }
+
+    .delete-button {
+      padding: 10px 14px;
+      background: #dc2626;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .delete-button:hover {
+      background: #991b1b;
+    }
+
+    .empty-message {
+      margin-top: 15px;
+      color: #6b7280;
+      font-size: 18px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: #111827;
+      color: white;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 700px) {
+      header h1 {
+        font-size: 32px;
+      }
+
+      nav a {
+        display: inline-block;
+        margin: 8px 10px;
+      }
+
+      .challenge-list li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Додати челенж</h1>
+    <p>Додавання пройдених челенжів HackTheBox</p>
+  </header>
+
+  <nav>
+    <a href="index.html">Головна</a>
+    <a href="htb.html">HackTheBox</a>
+    <a href="chhtb.html">Челенжі</a>
+  </nav>
+
+  <main>
+    <section>
+      <h2>Додати челенж</h2>
+      <p>Впишіть назву челенжу та посилання на нього, після чого натисніть кнопку “Опублікувати”.</p>
+
+      <form id="challengeForm">
+        <label>Назва + посилання на челенж</label>
+        <input type="text" id="challengeName" placeholder="Назва челенжу" required />
+        <input type="url" id="challengeLink" placeholder="Посилання на челенж" required />
+
+        <button type="submit" class="publish-button">Опублікувати</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Опубліковані челенжі</h2>
+      <ul class="challenge-list" id="adminChallengeList"></ul>
+      <p class="empty-message" id="emptyMessage">Поки що список челенжів порожній.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Кравчук Арсеній Юрійович. Усі права захищено.</p>
+  </footer>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc,
+    serverTimestamp,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyC7OJUhJHfA3zfQDKlzpMBduAs3rpg9JwM",
+  authDomain: "siteper.firebaseapp.com",
+  projectId: "siteper",
+  storageBucket: "siteper.firebasestorage.app",
+  messagingSenderId: "44911024562",
+  appId: "1:44911024562:web:aa0de8b190a496cb926cab",
+  measurementId: "G-SGMFS2W2KB"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const COLLECTION_NAME = "htbChallenges";
+
+  const form = document.getElementById("challengeForm");
+  const nameInput = document.getElementById("challengeName");
+  const linkInput = document.getElementById("challengeLink");
+  const adminList = document.getElementById("adminChallengeList");
+  const emptyMessage = document.getElementById("emptyMessage");
+
+  async function renderItems() {
+    adminList.innerHTML = "";
+
+    try {
+      const itemsQuery = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(itemsQuery);
+
+      if (querySnapshot.empty) {
+        emptyMessage.style.display = "block";
+        return;
+      }
+
+      emptyMessage.style.display = "none";
+
+      querySnapshot.forEach(function(documentItem) {
+        const item = documentItem.data();
+
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        const deleteButton = document.createElement("button");
+
+        link.href = item.link;
+        link.textContent = item.name;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        deleteButton.textContent = "Delete";
+        deleteButton.className = "delete-button";
+        deleteButton.onclick = async function() {
+          await deleteDoc(doc(db, COLLECTION_NAME, documentItem.id));
+          renderItems();
+        };
+
+        li.appendChild(link);
+        li.appendChild(deleteButton);
+        adminList.appendChild(li);
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Firebase loading error. Check Firestore rules and internet connection.");
+    }
+  }
+
+  form.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const name = nameInput.value.trim();
+    const link = linkInput.value.trim();
+
+    if (name === "" || link === "") {
+      alert("Fill in name and link.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, COLLECTION_NAME), {
+        name: name,
+        link: link,
+        createdAt: serverTimestamp()
+      });
+
+      nameInput.value = "";
+      linkInput.value = "";
+
+      await renderItems();
+      alert("Challenge published.");
+    } catch (error) {
+      console.error(error);
+      alert("Publish failed. Check Firestore rules.");
+    }
+  });
+
+  renderItems();
+</script>
+</body>
+</html>
