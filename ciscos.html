@@ -64,6 +64,7 @@
       padding: 30px;
       border-radius: 16px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      text-align: center;
     }
 
     section h2 {
@@ -72,51 +73,33 @@
       font-size: 28px;
     }
 
-    .certificate-list {
-      margin-top: 20px;
-      list-style: none;
+    section p {
       font-size: 18px;
+      margin-bottom: 20px;
     }
 
-    .certificate-list li {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 12px;
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 25px;
     }
 
-    .certificate-list a {
-      color: #2563eb;
-      font-weight: bold;
-      text-decoration: none;
-      overflow-wrap: anywhere;
-    }
-
-    .certificate-list a:hover {
-      text-decoration: underline;
-    }
-
-    .empty-message {
-      margin-top: 15px;
-      color: #6b7280;
-      font-size: 18px;
-    }
-
-    .add-button {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 14px 22px;
+    .button {
+      display: block;
+      padding: 22px;
       background: #2563eb;
       color: white;
       text-decoration: none;
-      border-radius: 10px;
+      border-radius: 12px;
+      font-size: 20px;
       font-weight: bold;
       transition: 0.3s;
     }
 
-    .add-button:hover {
+    .button:hover {
       background: #1e3a8a;
+      transform: translateY(-3px);
     }
 
     footer {
@@ -142,6 +125,7 @@
 <body>
   <header>
     <h1>Сертифікати Cisco</h1>
+    <p>Мої сертифікати, бейджі та досягнення Cisco</p>
   </header>
 
   <nav>
@@ -151,81 +135,39 @@
 
   <main>
     <section>
-      <h2>Список сертифікатів Cisco</h2>
-      <p>На цій сторінці наявні отримані мною сертифікати Cisco.</p>
-      <ul class="certificate-list" id="certificateList"></ul>
-      <p class="empty-message" id="emptyMessage">Поки що список сертифікатів порожній.</p>
+      <h2>Cisco</h2>
+      <p>Оберіть потрібний розділ для перегляду інформації.</p>
+
+      <div class="buttons">
+        <a 
+          href="https://docs.google.com/document/d/1kONyl7JCtALbevAE7g1oq-BcL9uGfoAqGV_CxFUFKSk/edit?hl=ru&tab=t.0" 
+          class="button" 
+          target="_blank"
+        >
+          Сертифікати
+        </a>
+
+        <a 
+          href="https://docs.google.com/document/d/1kMZk-J3JLlEX8-8jM6yNfdceNfud6ICi_ca32vBuszY/edit?tab=t.0" 
+          class="button" 
+          target="_blank"
+        >
+          Бейджі
+        </a>
+
+        <a 
+          href="https://docs.google.com/document/d/1DYOJnZvS15WiQTahrbgVMkm_zndogFWEJ9hD4N_561s/edit?tab=t.0" 
+          class="button" 
+          target="_blank"
+        >
+          Досягнення
+        </a>
+      </div>
     </section>
   </main>
 
   <footer>
     <p>&copy; 2026 Кравчук Арсеній Юрійович. Усі права захищено.</p>
   </footer>
-
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    getDocs,
-    query,
-    orderBy
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-  apiKey: "AIzaSyC7OJUhJHfA3zfQDKlzpMBduAs3rpg9JwM",
-  authDomain: "siteper.firebaseapp.com",
-  projectId: "siteper",
-  storageBucket: "siteper.firebasestorage.app",
-  messagingSenderId: "44911024562",
-  appId: "1:44911024562:web:aa0de8b190a496cb926cab",
-  measurementId: "G-SGMFS2W2KB"
-};
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  const COLLECTION_NAME = "ciscoCertificates";
-
-  const certificateList = document.getElementById("certificateList");
-  const emptyMessage = document.getElementById("emptyMessage");
-
-  async function renderCertificates() {
-    certificateList.innerHTML = "";
-
-    try {
-      const certificatesQuery = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(certificatesQuery);
-
-      if (querySnapshot.empty) {
-        emptyMessage.style.display = "block";
-        return;
-      }
-
-      emptyMessage.style.display = "none";
-
-      querySnapshot.forEach(function(documentItem) {
-        const certificate = documentItem.data();
-
-        const li = document.createElement("li");
-        const link = document.createElement("a");
-
-        link.href = certificate.fileUrl;
-        link.textContent = certificate.name;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-
-        li.appendChild(link);
-        certificateList.appendChild(li);
-      });
-    } catch (error) {
-      console.error(error);
-      emptyMessage.textContent = "Firebase loading error.";
-      emptyMessage.style.display = "block";
-    }
-  }
-
-  renderCertificates();
-</script>
 </body>
 </html>
