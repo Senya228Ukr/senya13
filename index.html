@@ -100,10 +100,20 @@
     }
 
     .achievement-card {
+      display: block;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
       padding: 20px;
       background: #f9fafb;
+      color: #1f2937;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .achievement-card:hover {
+      border-color: #93c5fd;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
     }
 
     .achievement-card h3 {
@@ -145,6 +155,7 @@
   <nav>
     <a href="htb.html">HackTheBox</a>
     <a href="thm.html">TryHackMe</a>
+    <a href="cryptohack.html">CryptoHack</a>
     <a href="sert.html">Сертифікати</a>
   </nav>
 
@@ -161,11 +172,36 @@
       </div>
     </section>
 
+    <section id="platforms">
+      <h2>Платформи та досягнення</h2>
+      <div class="achievements">
+        <a href="htb.html" class="achievement-card">
+          <h3>HackTheBox</h3>
+          <p>Машини, челенжі та сертифікація HackTheBox.</p>
+        </a>
+
+        <a href="thm.html" class="achievement-card">
+          <h3>TryHackMe</h3>
+          <p>Пройдені кімнати та отримані бейджі TryHackMe.</p>
+        </a>
+
+        <a href="cryptohack.html" class="achievement-card">
+          <h3>CryptoHack</h3>
+          <p>Сертифікати та досягнення з криптографії.</p>
+        </a>
+
+        <a href="sert.html" class="achievement-card">
+          <h3>Сертифікати</h3>
+          <p>Загальний розділ із сертифікатами та навчальними досягненнями.</p>
+        </a>
+      </div>
+    </section>
+
     <section id="education">
       <h2>Навчання</h2>
       <ul class="info-list">
         <li><strong>ЗВО:</strong> Харківський національний університет внутрішніх справ</li>
-        <li><strong>Група:</strong>ННІ4-23-303</li>
+        <li><strong>Група:</strong> ННІ4-23-303</li>
         <li><strong>Спеціальність:</strong> Кібербезпека та захист інформації</li>
       </ul>
     </section>

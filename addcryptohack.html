@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Додати сертифікат Cisco</title>
+  <title>Додати сертифікат CryptoHack</title>
   <style>
     * {
       box-sizing: border-box;
@@ -184,32 +184,31 @@
 </head>
 <body>
   <header>
-    <h1>Додати сертифікат Cisco</h1>
-    <p>Додавання сертифікатів Cisco до портфоліо</p>
+    <h1>Додати сертифікат CryptoHack</h1>
+    <p>Додавання отриманих сертифікатів CryptoHack</p>
   </header>
 
   <nav>
     <a href="index.html">Головна</a>
-    <a href="sert.html">Сертифікати</a>
-    <a href="ciscos.html">Cisco</a>
+    <a href="cryptohack.html">CryptoHack</a>
   </nav>
 
   <main>
     <section>
-      <h2>Додати сертифікат Cisco</h2>
+      <h2>Додати сертифікат</h2>
       <p>Впишіть назву сертифіката та посилання на нього, після чого натисніть кнопку “Опублікувати”.</p>
 
-     <form id="certificateForm">
-  <label>Назва + посилання на сертифікат</label>
-  <input type="text" id="certificateName" placeholder="Назва сертифіката" required />
-  <input type="url" id="certificateLink" placeholder="Посилання на сертифікат" required />
+      <form id="certificateForm">
+        <label>Назва + посилання на сертифікат</label>
+        <input type="text" id="certificateName" placeholder="Назва сертифіката" required />
+        <input type="url" id="certificateLink" placeholder="Посилання на сертифікат" required />
 
-  <button type="submit" class="publish-button">Опублікувати</button>
-</form>
+        <button type="submit" class="publish-button">Опублікувати</button>
+      </form>
     </section>
 
     <section>
-      <h2>Опубліковані сертифікати Cisco</h2>
+      <h2>Опубліковані сертифікати CryptoHack</h2>
       <ul class="certificate-list" id="adminCertificateList"></ul>
       <p class="empty-message" id="emptyMessage">Поки що список сертифікатів порожній.</p>
     </section>
@@ -234,32 +233,32 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyC7OJUhJHfA3zfQDKlzpMBduAs3rpg9JwM",
-    authDomain: "siteper.firebaseapp.com",
-    projectId: "siteper",
-    storageBucket: "siteper.firebasestorage.app",
-    messagingSenderId: "44911024562",
-    appId: "1:44911024562:web:aa0de8b190a496cb926cab",
-    measurementId: "G-SGMFS2W2KB"
-  };
+  apiKey: "AIzaSyC7OJUhJHfA3zfQDKlzpMBduAs3rpg9JwM",
+  authDomain: "siteper.firebaseapp.com",
+  projectId: "siteper",
+  storageBucket: "siteper.firebasestorage.app",
+  messagingSenderId: "44911024562",
+  appId: "1:44911024562:web:aa0de8b190a496cb926cab",
+  measurementId: "G-SGMFS2W2KB"
+};
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const COLLECTION_NAME = "ciscoCertificates";
+  const COLLECTION_NAME = "cryptoHackCertificates";
 
   const form = document.getElementById("certificateForm");
-  const certificateName = document.getElementById("certificateName");
-  const certificateLink = document.getElementById("certificateLink");
-  const adminCertificateList = document.getElementById("adminCertificateList");
+  const nameInput = document.getElementById("certificateName");
+  const linkInput = document.getElementById("certificateLink");
+  const adminList = document.getElementById("adminCertificateList");
   const emptyMessage = document.getElementById("emptyMessage");
 
-  async function renderCertificates() {
-    adminCertificateList.innerHTML = "";
+  async function renderItems() {
+    adminList.innerHTML = "";
 
     try {
-      const certificatesQuery = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(certificatesQuery);
+      const itemsQuery = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(itemsQuery);
 
       if (querySnapshot.empty) {
         emptyMessage.style.display = "block";
@@ -269,14 +268,14 @@
       emptyMessage.style.display = "none";
 
       querySnapshot.forEach(function(documentItem) {
-        const certificate = documentItem.data();
+        const item = documentItem.data();
 
         const li = document.createElement("li");
         const link = document.createElement("a");
         const deleteButton = document.createElement("button");
 
-        link.href = certificate.link || certificate.fileUrl;
-        link.textContent = certificate.name;
+        link.href = item.link;
+        link.textContent = item.name;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
 
@@ -284,24 +283,24 @@
         deleteButton.className = "delete-button";
         deleteButton.onclick = async function() {
           await deleteDoc(doc(db, COLLECTION_NAME, documentItem.id));
-          renderCertificates();
+          renderItems();
         };
 
         li.appendChild(link);
         li.appendChild(deleteButton);
-        adminCertificateList.appendChild(li);
+        adminList.appendChild(li);
       });
     } catch (error) {
       console.error(error);
-      alert("Помилка завантаження даних з Firebase.");
+      alert("Firebase loading error. Check Firestore rules and internet connection.");
     }
   }
 
   form.addEventListener("submit", async function(event) {
     event.preventDefault();
 
-    const name = certificateName.value.trim();
-    const link = certificateLink.value.trim();
+    const name = nameInput.value.trim();
+    const link = linkInput.value.trim();
 
     if (name === "" || link === "") {
       alert("Заповніть назву та посилання.");
@@ -315,18 +314,18 @@
         createdAt: serverTimestamp()
       });
 
-      certificateName.value = "";
-      certificateLink.value = "";
+      nameInput.value = "";
+      linkInput.value = "";
 
-      await renderCertificates();
-      alert("Сертифікат Cisco опубліковано.");
+      await renderItems();
+      alert("Сертифікат CryptoHack опубліковано.");
     } catch (error) {
       console.error(error);
-      alert("Не вдалося опублікувати. Перевірте правила Firestore.");
+      alert("Publish failed. Check Firestore rules.");
     }
   });
 
-  renderCertificates();
+  renderItems();
 </script>
 </body>
 </html>
